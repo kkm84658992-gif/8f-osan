@@ -5,45 +5,86 @@
 <title>재고조사</title>
 
 <style>
-body { font-family:sans-serif; padding:20px; background:#f0f9f4; }
-.card { background:white; padding:15px; border-radius:12px; margin-top:10px; }
-input { width:100%; padding:14px; font-size:18px; margin-top:8px; }
-button { width:100%; padding:14px; margin-top:8px; background:#66bb6a; color:white; border:none; }
+body {
+    font-family:sans-serif;
+    padding:20px;
+    background:#f0f9f4;
+}
+
+.header {
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    color:#2e7d32;
+    margin-bottom:10px;
+}
+
+.card {
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    margin-top:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+input {
+    width:100%;
+    padding:14px;
+    font-size:18px;
+    margin-top:8px;
+}
+
+button {
+    width:100%;
+    padding:14px;
+    margin-top:8px;
+    font-size:16px;
+    background:#66bb6a;
+    color:white;
+    border:none;
+    border-radius:6px;
+}
+
+#progressText {
+    font-size:16px;
+    font-weight:bold;
+    text-align:center;
+}
 </style>
 </head>
 
 <body>
 
-<form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+<div class="header">재고조사</div>
+
+<!-- 🔥 엑셀 업로드 -->
+<form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" class="card">
     <input type="file" name="file">
     <button type="submit">엑셀 업로드</button>
 </form>
 
-<div class="card">
-    <!-- 🔥 랙 스캔 -->
-    <input id="rack" placeholder="랙 바코드" onkeydown="rackEnter(event)" autofocus>
+<!-- 🔥 진행률 -->
+<div id="progressBox" class="card" style="display:none;">
+    <p id="progressText">진행률: 0 / 0 (0%)</p>
+</div>
 
-    <!-- 🔥 상품 스캔 -->
+<!-- 🔥 스캔 영역 -->
+<div class="card">
+    <input id="rack" placeholder="랙 바코드" onkeydown="rackEnter(event)" autofocus>
     <input id="product" placeholder="상품 바코드" onkeydown="scanEnter(event)">
 </div>
 
+<!-- 🔥 결과 표시 -->
 <div id="app"></div>
 
-<button onclick="download()">다운로드</button>
-<button onclick="share()">공유</button>
+<!-- 🔥 다운로드 / 공유 -->
+<div class="card">
+    <button onclick="download()">다운로드</button>
+    <button onclick="share()">공유</button>
+</div>
 
 <script>
 let data = {{ data|tojson }};
-
-// 🔥 초기 설정
-window.onload = function(){
-    if(data.length > 0){
-        document.getElementById('uploadForm').style.display = 'none';
-    }
-
-    // 항상 랙부터 시작
-    document.getElementById('rack').focus();
-}
 </script>
 
 <script src="/static/script.js"></script>
