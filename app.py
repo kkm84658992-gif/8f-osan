@@ -17,13 +17,12 @@ FILE_EXPIRE_TIME = 60 * 60
 def delete_old_files():
     now = time.time()
     for filename in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        if os.path.isfile(file_path):
-            if now - os.path.getmtime(file_path) > FILE_EXPIRE_TIME:
-                try:
-                    os.remove(file_path)
-                except:
-                    pass
+        path = os.path.join(UPLOAD_FOLDER, filename)
+        if os.path.isfile(path) and now - os.path.getmtime(path) > FILE_EXPIRE_TIME:
+            try:
+                os.remove(path)
+            except:
+                pass
 
 
 @app.route('/login')
@@ -57,74 +56,41 @@ def index():
     return render_template('index.html', data=[])
 
 
-@app.route('/admin')
-def admin():
-    if not session.get('login') or session.get('role') != 'admin':
-        return redirect('/login')
-
-    files = []
-    for filename in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        if os.path.isfile(file_path):
-            files.append({
-                "id": filename.replace(".xlsx",""),
-                "time": time.strftime('%Y-%m-%d %H:%M:%S',
-                        time.localtime(os.path.getmtime(file_path)))
-            })
-
-    files = sorted(files, key=lambda x: x["time"], reverse=True)
-
-    return render_template('admin.html', files=files)
-
-
 @app.route('/upload', methods=['POST'])
 def upload():
-    try:
-        file = request.files['file']
-        filename = secure_filename(file.filename.lower())
+    file = request.files['file']
+    filename = secure_filename(file.filename.lower())
 
-        if filename.endswith('.csv'):
-            df = pd.read_csv(file)
-        else:
-            df = pd.read_excel(file, engine='openpyxl')
+    if filename.endswith('.csv'):
+        df = pd.read_csv(file)
+    else:
+        df = pd.read_excel(file, engine='openpyxl')
 
-        required_cols = ["로케이션", "상품명", "재고수량"]
-        for col in required_cols:
-            if col not in df.columns:
-                return f"{col} 없음"
+    # 🔥 필수 컬럼
+    required = ["로케이션", "상품명", "바코드", "재고수량"]
+    for col in required:
+        if col not in df.columns:
+            return f"{col} 없음"
 
-        if "소비기한" not in df.columns:
-            df["소비기한"] = ""
-        else:
-            df["소비기한"] = df["소비기한"].astype(str).str[:10]
+    df["로케이션"] = df["로케이션"].astype(str).str.strip()
+    df["상품명"] = df["상품명"].astype(str).str.strip()
+    df["바코드"] = df["바코드"].astype(str).str.strip()
 
-        if "로트번호" not in df.columns:
-            df["로트번호"] = ""
+    if "소비기한" not in df.columns:
+        df["소비기한"] = ""
+    if "로트번호" not in df.columns:
+        df["로트번호"] = ""
 
-        # 🔥 핵심: 문자열 정리
-        df["로케이션"] = df["로케이션"].astype(str).str.strip()
-        df["상품명"] = df["상품명"].astype(str).str.strip()
+    df["재고수량"] = pd.to_numeric(df["재고수량"], errors='coerce').fillna(0)
 
-        df["재고수량"] = (
-            df["재고수량"]
-            .astype(str)
-            .str.replace(",", "")
-        )
-        df["재고수량"] = pd.to_numeric(df["재고수량"], errors='coerce').fillna(0)
+    df = df[["로케이션","상품명","바코드","소비기한","로트번호","재고수량"]]
 
-        df = df.sort_values(by="로케이션")
-        df = df[["로케이션","상품명","소비기한","로트번호","재고수량"]]
-
-        return render_template('index.html', data=df.to_dict(orient='records'))
-
-    except Exception as e:
-        return str(e)
+    return render_template('index.html', data=df.to_dict(orient='records'))
 
 
 @app.route('/save', methods=['POST'])
 def save():
     delete_old_files()
-
     df = pd.DataFrame(request.json)
 
     file_id = str(uuid.uuid4())
@@ -138,22 +104,9 @@ def save():
 @app.route('/download/<file_id>')
 def download(file_id):
     path = os.path.join(UPLOAD_FOLDER, f"{file_id}.xlsx")
-
     if not os.path.exists(path):
         return "파일 없음"
-
     return send_file(path, download_name="inventory.xlsx", as_attachment=True)
-
-
-@app.route('/delete/<file_id>', methods=['POST'])
-def delete_file(file_id):
-    path = os.path.join(UPLOAD_FOLDER, f"{file_id}.xlsx")
-
-    if os.path.exists(path):
-        os.remove(path)
-        return "삭제 완료"
-
-    return "파일 없음"
 
 
 if __name__ == '__main__':
