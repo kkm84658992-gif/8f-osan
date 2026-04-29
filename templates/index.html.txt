@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재고조사</title>
+
+<style>
+body { font-family:sans-serif; padding:20px; background:#f0f9f4; }
+.card { background:white; padding:15px; border-radius:12px; margin-top:10px; }
+input { width:100%; padding:14px; font-size:18px; margin-top:8px; }
+button { width:100%; padding:14px; margin-top:8px; background:#66bb6a; color:white; border:none; }
+</style>
+</head>
+
+<body>
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <button type="submit">엑셀 업로드</button>
+</form>
+
+<div class="card">
+    <input id="rack" placeholder="랙 바코드">
+    <input id="product" placeholder="상품 바코드" onkeydown="scanEnter(event)">
+</div>
+
+<div id="app"></div>
+
+<button onclick="download()">다운로드</button>
+<button onclick="share()">공유</button>
+
+<script>
+let data = {{ data|tojson }};
+</script>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>
