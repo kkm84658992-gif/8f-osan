@@ -9,12 +9,11 @@ function normalize(v){
 let currentItem = null;
 
 /* =========================
-   진행률 계산
+   진행률
 ========================= */
 function updateProgress(){
     let total = data.length;
     let done = data.filter(d => d["실수량"] !== undefined).length;
-
     let percent = total === 0 ? 0 : Math.floor((done / total) * 100);
 
     document.getElementById('progressBox').style.display = 'block';
@@ -28,8 +27,11 @@ function updateProgress(){
 function rackEnter(e){
     if(e.key === "Enter"){
         e.preventDefault();
-        document.getElementById('product').focus();
-        document.getElementById('product').value = "";
+
+        if(document.getElementById('rack').value.trim() !== ""){
+            document.getElementById('product').focus();
+            document.getElementById('product').value = "";
+        }
     }
 }
 
@@ -102,7 +104,7 @@ function calc(){
 }
 
 /* =========================
-   다음 버튼 (저장 + 진행률)
+   다음 버튼 (핵심)
 ========================= */
 function nextItem(){
     const realInput = document.getElementById('real');
@@ -116,21 +118,28 @@ function nextItem(){
     let stock = cleanNumber(currentItem["재고수량"]);
     let diff = real - stock;
 
+    // 🔥 데이터 저장
     currentItem["실수량"] = real;
     currentItem["차이수량"] = diff;
 
     // 🔥 진행률 업데이트
     updateProgress();
 
-    // UI 초기화
+    // 🔥 UI 숨김
     document.getElementById('app').innerHTML = "";
 
-    document.getElementById('product').value = "";
-    document.getElementById('product').focus();
+    // 🔥 핵심: 랙 초기화 + 포커스
+    const rackInput = document.getElementById('rack');
+    const productInput = document.getElementById('product');
+
+    rackInput.value = "";
+    productInput.value = "";
+
+    rackInput.focus();
 }
 
 /* =========================
-   신규 등록
+   신규 등록 UI
 ========================= */
 function renderNew(rack, product){
     document.getElementById('app').innerHTML = `
@@ -148,6 +157,9 @@ function renderNew(rack, product){
     `;
 }
 
+/* =========================
+   신규 등록 처리
+========================= */
 function addNew(){
     let item = {
         "로케이션": document.getElementById('n_loc').value,
@@ -167,7 +179,11 @@ function addNew(){
     updateProgress();
 
     document.getElementById('app').innerHTML = "";
-    document.getElementById('product').focus();
+
+    // 🔥 동일 흐름
+    document.getElementById('rack').value = "";
+    document.getElementById('product').value = "";
+    document.getElementById('rack').focus();
 }
 
 /* =========================
