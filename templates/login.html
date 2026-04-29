@@ -5,24 +5,79 @@
 <title>로그인</title>
 
 <style>
-body { font-family:sans-serif; padding:20px; background:#f0f9f4; }
-.card { background:white; padding:20px; border-radius:12px; margin-top:20px; }
+body {
+    font-family:sans-serif;
+    background:#f0f9f4;
+    padding:20px;
+}
 
+/* 전체 카드 */
+.card {
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    max-width:400px;
+    margin:auto;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* 제목 */
+.header {
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:20px;
+    color:#2e7d32;
+}
+
+/* 역할 선택 버튼 */
+.role-select {
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.role-btn {
+    flex:1;
+    padding:14px;
+    font-size:16px;
+    border:none;
+    border-radius:10px;
+    background:#e0e0e0;
+    cursor:pointer;
+}
+
+.role-btn.active {
+    background:#66bb6a;
+    color:white;
+    font-weight:bold;
+}
+
+/* 입력 */
 input {
     width:100%;
     padding:14px;
     font-size:18px;
-    margin-top:8px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
 }
 
-button {
+/* 로그인 버튼 */
+.login-btn {
     width:100%;
-    padding:14px;
+    padding:16px;
     font-size:18px;
-    margin-top:8px;
-    background:#66bb6a;
+    margin-top:15px;
+    background:#2e7d32;
     color:white;
     border:none;
+    border-radius:10px;
+}
+
+/* 모바일 */
+@media (max-width:480px){
+    .card { padding:20px; }
 }
 </style>
 </head>
@@ -30,18 +85,39 @@ button {
 <body>
 
 <div class="card">
+    <div class="header">로그인</div>
+
+    <!-- 🔥 역할 선택 버튼 -->
+    <div class="role-select">
+        <button type="button" class="role-btn active" onclick="selectRole('user', this)">사용자</button>
+        <button type="button" class="role-btn" onclick="selectRole('admin', this)">관리자</button>
+    </div>
+
     <form method="post">
+        <!-- 실제 전송 값 -->
+        <input type="hidden" name="role" id="role" value="user">
+
         <input name="id" placeholder="아이디">
         <input name="pw" type="password" placeholder="비밀번호">
 
-        <select name="role">
-            <option value="user">사용자</option>
-            <option value="admin">관리자</option>
-        </select>
-
-        <button type="submit">로그인</button>
+        <button class="login-btn" type="submit">로그인</button>
     </form>
 </div>
+
+<script>
+function selectRole(role, el){
+
+    // 값 변경
+    document.getElementById('role').value = role;
+
+    // 버튼 스타일 변경
+    document.querySelectorAll('.role-btn').forEach(btn=>{
+        btn.classList.remove('active');
+    });
+
+    el.classList.add('active');
+}
+</script>
 
 </body>
 </html>
