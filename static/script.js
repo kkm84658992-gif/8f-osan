@@ -2,33 +2,22 @@ function cleanNumber(v){
     return parseFloat(String(v).replace(/,/g,'')) || 0;
 }
 
-// 🔥 바코드 비교용 정규화
 function normalize(v){
     return String(v).trim().replace(/\s/g,'').toLowerCase();
 }
 
 let currentItem = null;
 
-/* =========================
-   🔥 랙 스캔 → 상품칸 이동
-========================= */
+/* 랙 → 상품 이동 */
 function rackEnter(e){
     if(e.key === "Enter"){
         e.preventDefault();
-
-        const rackInput = document.getElementById('rack');
-        const productInput = document.getElementById('product');
-
-        if(rackInput.value.trim() !== ""){
-            productInput.focus();
-            productInput.value = "";
-        }
+        document.getElementById('product').focus();
+        document.getElementById('product').value = "";
     }
 }
 
-/* =========================
-   🔥 상품 스캔
-========================= */
+/* 상품 스캔 */
 function scanEnter(e){
     if(e.key === "Enter"){
         e.preventDefault();
@@ -53,14 +42,11 @@ function searchItem(){
         renderNew(rack, product);
     }
 
-    // 🔥 연속 스캔 유지
     document.getElementById('product').value = "";
     document.getElementById('product').focus();
 }
 
-/* =========================
-   기존 데이터 표시
-========================= */
+/* 기존 데이터 */
 function renderFound(item){
     document.getElementById('app').innerHTML = `
         <div class="card">
@@ -76,9 +62,7 @@ function renderFound(item){
     `;
 }
 
-/* =========================
-   차이 계산
-========================= */
+/* 차이 계산 */
 function calc(){
     let real = cleanNumber(document.getElementById('real').value);
     let stock = cleanNumber(currentItem["재고수량"]);
@@ -90,9 +74,7 @@ function calc(){
     currentItem["차이수량"] = diff;
 }
 
-/* =========================
-   신규 등록 UI
-========================= */
+/* 신규 */
 function renderNew(rack, product){
     document.getElementById('app').innerHTML = `
         <div class="card">
@@ -109,9 +91,6 @@ function renderNew(rack, product){
     `;
 }
 
-/* =========================
-   신규 등록 처리
-========================= */
 function addNew(){
     let item = {
         "로케이션": document.getElementById('n_loc').value,
@@ -127,13 +106,10 @@ function addNew(){
     data.push(item);
 
     alert("등록 완료");
-
     document.getElementById('app').innerHTML = "";
 }
 
-/* =========================
-   다운로드 / 공유
-========================= */
+/* 다운로드 */
 function download(){
     fetch('/save',{
         method:'POST',
@@ -146,6 +122,7 @@ function download(){
     });
 }
 
+/* 공유 */
 function share(){
     fetch('/save',{
         method:'POST',
