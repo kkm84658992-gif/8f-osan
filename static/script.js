@@ -8,7 +8,9 @@ function normalize(v){
 
 let currentItem = null;
 
-/* 랙 → 상품 이동 */
+/* =========================
+   랙 스캔 → 상품칸 이동
+========================= */
 function rackEnter(e){
     if(e.key === "Enter"){
         e.preventDefault();
@@ -17,7 +19,9 @@ function rackEnter(e){
     }
 }
 
-/* 상품 스캔 */
+/* =========================
+   상품 스캔
+========================= */
 function scanEnter(e){
     if(e.key === "Enter"){
         e.preventDefault();
@@ -43,10 +47,11 @@ function searchItem(){
     }
 
     document.getElementById('product').value = "";
-    document.getElementById('product').focus();
 }
 
-/* 기존 데이터 */
+/* =========================
+   기존 데이터 표시
+========================= */
 function renderFound(item){
     document.getElementById('app').innerHTML = `
         <div class="card">
@@ -56,25 +61,64 @@ function renderFound(item){
             <p><b>로트번호:</b> ${item["로트번호"] || "미표기"}</p>
             <p><b>재고수량:</b> ${item["재고수량"]}</p>
 
-            <input id="real" placeholder="실수량" oninput="calc()">
+            <input id="real" placeholder="실수량" oninput="calc()" autofocus>
             <p>차이수량: <span id="diff">0</span></p>
+
+            <!-- 🔥 다음 버튼 -->
+            <button onclick="nextItem()">다음</button>
         </div>
     `;
+
+    // 🔥 Enter로도 다음 가능
+    document.getElementById('real').addEventListener("keydown", function(e){
+        if(e.key === "Enter"){
+            e.preventDefault();
+            nextItem();
+        }
+    });
 }
 
-/* 차이 계산 */
+/* =========================
+   차이 계산
+========================= */
 function calc(){
     let real = cleanNumber(document.getElementById('real').value);
     let stock = cleanNumber(currentItem["재고수량"]);
     let diff = real - stock;
 
     document.getElementById('diff').innerText = diff;
-
-    currentItem["실수량"] = real;
-    currentItem["차이수량"] = diff;
 }
 
-/* 신규 */
+/* =========================
+   다음 버튼 (핵심)
+========================= */
+function nextItem(){
+    const realInput = document.getElementById('real');
+
+    if(!realInput || realInput.value.trim() === ""){
+        alert("실수량 입력해주세요");
+        return;
+    }
+
+    let real = cleanNumber(realInput.value);
+    let stock = cleanNumber(currentItem["재고수량"]);
+    let diff = real - stock;
+
+    // 🔥 데이터 저장
+    currentItem["실수량"] = real;
+    currentItem["차이수량"] = diff;
+
+    // 🔥 UI 숨김
+    document.getElementById('app').innerHTML = "";
+
+    // 🔥 다음 스캔 준비
+    document.getElementById('product').value = "";
+    document.getElementById('product').focus();
+}
+
+/* =========================
+   신규 등록 UI
+========================= */
 function renderNew(rack, product){
     document.getElementById('app').innerHTML = `
         <div class="card">
@@ -91,6 +135,9 @@ function renderNew(rack, product){
     `;
 }
 
+/* =========================
+   신규 등록 처리
+========================= */
 function addNew(){
     let item = {
         "로케이션": document.getElementById('n_loc').value,
@@ -106,10 +153,14 @@ function addNew(){
     data.push(item);
 
     alert("등록 완료");
+
     document.getElementById('app').innerHTML = "";
+    document.getElementById('product').focus();
 }
 
-/* 다운로드 */
+/* =========================
+   다운로드
+========================= */
 function download(){
     fetch('/save',{
         method:'POST',
@@ -122,7 +173,9 @@ function download(){
     });
 }
 
-/* 공유 */
+/* =========================
+   공유
+========================= */
 function share(){
     fetch('/save',{
         method:'POST',
