@@ -72,14 +72,27 @@ def upload():
         if col not in df.columns:
             return f"{col} 없음"
 
+    # 문자열 정리
     df["로케이션"] = df["로케이션"].astype(str).str.strip()
     df["상품명"] = df["상품명"].astype(str).str.strip()
     df["바코드"] = df["바코드"].astype(str).str.strip()
 
+    # 선택 컬럼
     if "소비기한" not in df.columns:
         df["소비기한"] = ""
+    else:
+        df["소비기한"] = df["소비기한"].astype(str).str[:10]
+
     if "로트번호" not in df.columns:
         df["로트번호"] = ""
+
+    # 🔥 핵심: 재고수량 숫자만 추출
+    df["재고수량"] = (
+        df["재고수량"]
+        .astype(str)
+        .str.replace(",", "")
+        .str.extract(r'(\d+)')[0]
+    )
 
     df["재고수량"] = pd.to_numeric(df["재고수량"], errors='coerce').fillna(0)
 
