@@ -9,7 +9,21 @@ function normalize(v){
 let currentItem = null;
 
 /* =========================
-   랙 스캔 → 상품칸 이동
+   진행률 계산
+========================= */
+function updateProgress(){
+    let total = data.length;
+    let done = data.filter(d => d["실수량"] !== undefined).length;
+
+    let percent = total === 0 ? 0 : Math.floor((done / total) * 100);
+
+    document.getElementById('progressBox').style.display = 'block';
+    document.getElementById('progressText').innerText =
+        `진행률: ${done} / ${total} (${percent}%)`;
+}
+
+/* =========================
+   랙 → 상품 이동
 ========================= */
 function rackEnter(e){
     if(e.key === "Enter"){
@@ -64,12 +78,10 @@ function renderFound(item){
             <input id="real" placeholder="실수량" oninput="calc()" autofocus>
             <p>차이수량: <span id="diff">0</span></p>
 
-            <!-- 🔥 다음 버튼 -->
             <button onclick="nextItem()">다음</button>
         </div>
     `;
 
-    // 🔥 Enter로도 다음 가능
     document.getElementById('real').addEventListener("keydown", function(e){
         if(e.key === "Enter"){
             e.preventDefault();
@@ -90,7 +102,7 @@ function calc(){
 }
 
 /* =========================
-   다음 버튼 (핵심)
+   다음 버튼 (저장 + 진행률)
 ========================= */
 function nextItem(){
     const realInput = document.getElementById('real');
@@ -104,20 +116,21 @@ function nextItem(){
     let stock = cleanNumber(currentItem["재고수량"]);
     let diff = real - stock;
 
-    // 🔥 데이터 저장
     currentItem["실수량"] = real;
     currentItem["차이수량"] = diff;
 
-    // 🔥 UI 숨김
+    // 🔥 진행률 업데이트
+    updateProgress();
+
+    // UI 초기화
     document.getElementById('app').innerHTML = "";
 
-    // 🔥 다음 스캔 준비
     document.getElementById('product').value = "";
     document.getElementById('product').focus();
 }
 
 /* =========================
-   신규 등록 UI
+   신규 등록
 ========================= */
 function renderNew(rack, product){
     document.getElementById('app').innerHTML = `
@@ -135,9 +148,6 @@ function renderNew(rack, product){
     `;
 }
 
-/* =========================
-   신규 등록 처리
-========================= */
 function addNew(){
     let item = {
         "로케이션": document.getElementById('n_loc').value,
@@ -153,6 +163,8 @@ function addNew(){
     data.push(item);
 
     alert("등록 완료");
+
+    updateProgress();
 
     document.getElementById('app').innerHTML = "";
     document.getElementById('product').focus();
@@ -188,4 +200,17 @@ function share(){
         navigator.clipboard.writeText(url);
         alert("다운로드 링크 복사됨");
     });
+}
+
+/* =========================
+   초기 실행
+========================= */
+window.onload = function(){
+    if(data.length > 0){
+        document.getElementById('uploadForm').style.display = 'none';
+    }
+
+    updateProgress();
+
+    document.getElementById('rack').focus();
 }
