@@ -2,6 +2,11 @@ function cleanNumber(v){
     return parseFloat(String(v).replace(/,/g,'')) || 0;
 }
 
+// 🔥 핵심: 바코드 정규화
+function normalize(v){
+    return String(v).trim().replace(/\s/g,'').toLowerCase();
+}
+
 let currentItem = null;
 
 function scanEnter(e){
@@ -12,12 +17,12 @@ function scanEnter(e){
 }
 
 function searchItem(){
-    let rack = document.getElementById('rack').value.trim();
-    let product = document.getElementById('product').value.trim();
+    let rack = normalize(document.getElementById('rack').value);
+    let product = normalize(document.getElementById('product').value);
 
     let found = data.find(d =>
-        String(d["로케이션"]) === rack &&
-        String(d["상품명"]) === product
+        normalize(d["로케이션"]) === rack &&
+        normalize(d["상품명"]) === product
     );
 
     if(found){
@@ -84,7 +89,9 @@ function addNew(){
     };
 
     data.push(item);
+
     alert("등록 완료");
+
     document.getElementById('app').innerHTML = "";
 }
 
