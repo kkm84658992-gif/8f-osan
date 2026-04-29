@@ -101,6 +101,10 @@ def upload():
         if "로트번호" not in df.columns:
             df["로트번호"] = ""
 
+        # 🔥 핵심: 문자열 정리
+        df["로케이션"] = df["로케이션"].astype(str).str.strip()
+        df["상품명"] = df["상품명"].astype(str).str.strip()
+
         df["재고수량"] = (
             df["재고수량"]
             .astype(str)
@@ -131,7 +135,6 @@ def save():
     return jsonify({"download_url": f"/download/{file_id}"})
 
 
-# 🔥 로그인 없이 다운로드 가능
 @app.route('/download/<file_id>')
 def download(file_id):
     path = os.path.join(UPLOAD_FOLDER, f"{file_id}.xlsx")
