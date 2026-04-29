@@ -20,7 +20,10 @@ button { width:100%; padding:14px; margin-top:8px; background:#66bb6a; color:whi
 </form>
 
 <div class="card">
-    <input id="rack" placeholder="랙 바코드" autofocus>
+    <!-- 🔥 랙 스캔 -->
+    <input id="rack" placeholder="랙 바코드" onkeydown="rackEnter(event)" autofocus>
+
+    <!-- 🔥 상품 스캔 -->
     <input id="product" placeholder="상품 바코드" onkeydown="scanEnter(event)">
 </div>
 
@@ -32,11 +35,14 @@ button { width:100%; padding:14px; margin-top:8px; background:#66bb6a; color:whi
 <script>
 let data = {{ data|tojson }};
 
-// 🔥 업로드 후 UI 숨김
+// 🔥 초기 설정
 window.onload = function(){
     if(data.length > 0){
         document.getElementById('uploadForm').style.display = 'none';
     }
+
+    // 항상 랙부터 시작
+    document.getElementById('rack').focus();
 }
 </script>
 
