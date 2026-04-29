@@ -2,12 +2,18 @@ function cleanNumber(v){
     return parseFloat(String(v).replace(/,/g,'')) || 0;
 }
 
-// 🔥 핵심: 바코드 정규화
 function normalize(v){
     return String(v).trim().replace(/\s/g,'').toLowerCase();
 }
 
 let currentItem = null;
+
+function rackEnter(e){
+    if(e.key === "Enter"){
+        e.preventDefault();
+        document.getElementById('product').focus();
+    }
+}
 
 function scanEnter(e){
     if(e.key === "Enter"){
@@ -22,7 +28,7 @@ function searchItem(){
 
     let found = data.find(d =>
         normalize(d["로케이션"]) === rack &&
-        normalize(d["상품명"]) === product
+        normalize(d["바코드"]) === product
     );
 
     if(found){
@@ -34,6 +40,7 @@ function searchItem(){
     }
 
     document.getElementById('product').value = "";
+    document.getElementById('product').focus();
 }
 
 function renderFound(item){
@@ -66,7 +73,8 @@ function renderNew(rack, product){
     document.getElementById('app').innerHTML = `
         <div class="card">
             <h3>신규 등록</h3>
-            <input id="n_name" value="${product}" placeholder="상품명">
+            <input id="n_name" placeholder="상품명">
+            <input id="n_barcode" value="${product}" placeholder="바코드">
             <input id="n_exp" placeholder="소비기한">
             <input id="n_lot" placeholder="로트">
             <input id="n_qty" placeholder="재고수량">
@@ -81,6 +89,7 @@ function addNew(){
     let item = {
         "로케이션": document.getElementById('n_loc').value,
         "상품명": document.getElementById('n_name').value,
+        "바코드": document.getElementById('n_barcode').value,
         "소비기한": document.getElementById('n_exp').value,
         "로트번호": document.getElementById('n_lot').value,
         "재고수량": cleanNumber(document.getElementById('n_qty').value),
