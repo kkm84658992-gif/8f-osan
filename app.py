@@ -8,6 +8,17 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = "secret_key_123"
 
+# 🔥 계정 추가는 여기에서만 하면 됨
+admins = {
+    "김경민": "ourbox123",
+}
+
+users = {
+    "김경민": "ourbox",
+    "8층": "1234",
+    "7층": "5678"
+}
+
 UPLOAD_FOLDER = "files"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -36,15 +47,19 @@ def login():
     pw = request.form.get('pw')
     role = request.form.get('role')
 
-    if role == "admin" and user_id == "김경민" and pw == "ourbox123":
-        session['login'] = True
-        session['role'] = 'admin'
-        return redirect('/admin')
+    # 🔥 관리자 로그인
+    if role == "admin":
+        if user_id in admins and admins[user_id] == pw:
+            session['login'] = True
+            session['role'] = 'admin'
+            return redirect('/admin')
 
-    elif role == "user" and user_id == "김경민" and pw == "ourbox":
-        session['login'] = True
-        session['role'] = 'user'
-        return redirect('/')
+    # 🔥 사용자 로그인
+    elif role == "user":
+        if user_id in users and users[user_id] == pw:
+            session['login'] = True
+            session['role'] = 'user'
+            return redirect('/')
 
     return "로그인 실패"
 
@@ -86,7 +101,7 @@ def upload():
     if "로트번호" not in df.columns:
         df["로트번호"] = ""
 
-    # 🔥 핵심: 재고수량 숫자만 추출
+    # 🔥 재고수량 숫자만 추출
     df["재고수량"] = (
         df["재고수량"]
         .astype(str)
